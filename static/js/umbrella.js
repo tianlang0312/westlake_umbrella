@@ -102,6 +102,10 @@ export class UmbrellaScene {
     this.texture.colorSpace = THREE.SRGBColorSpace;
     this.texture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
     window.addEventListener('silk-pattern-ready', () => { this.refreshTexture(); });
+    // store 重绘贴图后只通知置脏，避免再次触发 drawTexture 造成递归
+    window.addEventListener('silk-texture-refresh', () => {
+      if (this.texture) this.texture.needsUpdate = true;
+    });
     this.canopyMat = new THREE.MeshStandardMaterial({
       map: this.texture, side: THREE.DoubleSide, roughness: .94,
       metalness: 0, transparent: true, opacity: 1, vertexColors: true,

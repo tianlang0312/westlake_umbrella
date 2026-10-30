@@ -12,6 +12,8 @@
 
 body {
     margin: 0;
+    height: 100%;
+    overflow: hidden;
     background: #f7f5ef;
     color: var(--dark);
     font-family: system-ui, 'PingFang SC', 'Microsoft Yahei', sans-serif;
@@ -180,13 +182,21 @@ button { font-family: inherit; }
 /* ============ 第一幕 · 知伞 ============ */
 #view-know { height: 100vh; padding-top: 46px; }
 
-.know-layout { display: grid; grid-template-columns: 1fr 1fr; height: calc(100vh - 46px); }
+.know-layout { display: grid; grid-template-columns: 1.1fr .9fr; height: calc(100vh - 46px); }
 
-.know-scroll { overflow-y: auto; scroll-behavior: smooth; }
+/* 整屏吸附：一次滚动/滑动直接切到下一段，跳过两段之间的过渡 */
+.know-scroll {
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+}
 
 .know-section {
-    min-height: 82vh;
-    padding: 8vh 7%;
+    min-height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    padding: 5vh 7%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -195,23 +205,31 @@ button { font-family: inherit; }
 .know-kicker {
     color: var(--sage);
     letter-spacing: .4em;
-    font-size: 13px;
-    margin: 0 0 8px;
+    font-size: 15px;
+    margin: 0 0 12px;
 }
 
-.know-section h2 { font-size: 30px; font-weight: 500; margin: 0 0 14px; }
+/* 章节序号：保持存在感但不占高度 */
+.chapter-index {
+    color: var(--sage) !important;
+    letter-spacing: .35em;
+    font-size: 13px !important;
+    margin: 0 0 6px !important;
+}
 
-.know-section h3 { font-size: 24px; font-weight: 500; margin: 0 0 14px; }
+.know-section h2 { font-size: 42px; line-height: 1.45; font-weight: 500; margin: 0 0 20px; }
 
-.know-section p { line-height: 1.9; color: #4d605c; }
+.know-section h3 { font-size: 34px; line-height: 1.4; font-weight: 500; margin: 0 0 20px; }
 
-.scroll-hint { animation: bob 1.6s infinite; color: var(--sage) !important; letter-spacing: .3em; }
+.know-section p { font-size: 19px; line-height: 2; color: #4d605c; margin: 0 0 14px; }
+
+.scroll-hint { animation: bob 1.6s infinite; color: var(--sage) !important; letter-spacing: .3em; font-size: 17px !important; }
 
 @keyframes bob { 50% { transform: translateY(8px); } }
 
 .timeline { border-left: 3px solid var(--sage); padding-left: 22px; margin-top: 10px; }
 
-.tl-item { margin-bottom: 20px; position: relative; }
+.tl-item { margin-bottom: 8px; position: relative; }
 
 .tl-item::before {
     content: '';
@@ -225,9 +243,20 @@ button { font-family: inherit; }
     border: 2px solid #fff;
 }
 
-.tl-item b { display: block; color: var(--dark); }
+.tl-item b { display: block; color: var(--dark); font-size: 19px; margin-bottom: 4px; }
 
-.tl-item span { font-size: 14px; color: #5d716c; line-height: 1.7; }
+.tl-item span { font-size: 16px; color: #5d716c; line-height: 1.9; }
+
+/* 溯源段条目较多，单独压缩行距，保证整屏一页放得下（不裁切） */
+.know-section[data-step="1"] { padding: 3.5vh 7%; }
+
+.know-section[data-step="1"] h3 { font-size: 30px; margin: 0 0 12px; }
+
+.know-section[data-step="1"] .tl-item { margin-bottom: 4px; }
+
+.know-section[data-step="1"] .tl-item b { font-size: 17px; margin-bottom: 1px; }
+
+.know-section[data-step="1"] .tl-item span { font-size: 15px; line-height: 1.7; }
 
 .know-stage {
     position: relative;
@@ -255,7 +284,8 @@ button { font-family: inherit; }
     background: #fff;
     color: var(--dark);
     border-radius: 20px;
-    padding: 8px 20px;
+    padding: 10px 24px;
+    font-size: 16px;
     cursor: pointer;
 }
 
@@ -264,36 +294,38 @@ button { font-family: inherit; }
 .part-info {
     background: #fff;
     border-radius: 12px;
-    padding: 16px 20px;
+    padding: 18px 24px;
     box-shadow: 0 4px 20px #334a4812;
-    font-size: 14px;
-    line-height: 1.9;
+    font-size: 17px;
+    line-height: 2;
 }
 
-.material-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 10px 0 16px; }
+.material-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 12px 0 18px; }
 
 .mat-card {
     background: #fff;
     border: 1px solid #e0dbcb;
     border-radius: 14px;
-    padding: 18px 8px;
+    padding: 22px 8px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     transition: transform .2s, box-shadow .2s;
 }
 
 .mat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px #334a4822; }
 
-.mat-card i { font-style: normal; font-size: 28px; }
+.mat-card i { font-style: normal; font-size: 34px; }
 
-.mat-card span { font-size: 12px; color: var(--sage); }
+.mat-card b { font-size: 17px; font-weight: 500; }
+
+.mat-card span { font-size: 13px; color: var(--sage); }
 
 .know-final { align-items: center; text-align: center; }
 
-.big-quote { font-size: 26px; line-height: 2.2; color: var(--dark) !important; letter-spacing: .15em; }
+.big-quote { font-size: 34px; line-height: 2.1; color: var(--dark) !important; letter-spacing: .15em; }
 
 /* ============ 第二幕 · 制伞 ============ */
 #view-make { height: 100vh; padding-top: 46px; }
@@ -443,6 +475,26 @@ button { font-family: inherit; }
 }
 
 .color-dot.active { box-shadow: 0 0 0 3px var(--dark); }
+
+/* 画笔工具条 */
+.brush-toolbar { display: flex; gap: 8px; margin: 12px 0 4px; flex-wrap: wrap; }
+
+.tool-btn {
+    flex: 1;
+    min-width: 84px;
+    border: 1px solid #d7d8d1;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--dark);
+    padding: 9px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+}
+
+.tool-btn:hover { border-color: var(--sage); }
+
+.tool-btn.active { background: var(--dark); color: #fff; border-color: var(--dark); }
 
 .draw-pad {
     width: 100%;

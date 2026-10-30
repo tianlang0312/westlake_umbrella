@@ -1,19 +1,27 @@
 // 全局共享状态：伞面纹理画布、作品信息、制伞进度
 export const store = {
   workName: '我的西湖绸伞',
-  patternImg: null,      // 用户上传/生成的图案
+  patternImg: null,      // 用户上传/生成的图案（底层）
   scale: 100,
   rotate: 0,
   stepsDone: { zhu: false, gu: false, zhuang: false, hu: false, hui: false, you: false },
 };
 
+// 最终用于三维伞面贴图的画布
 export const texCanvas = document.createElement('canvas');
 texCanvas.width = texCanvas.height = 1024;
 export const texCtx = texCanvas.getContext('2d');
 
+// 用户创作层：纹样元素、手绘笔迹、橡皮擦结果都只写在这一层。
+// 它与底纸/底图分离，因此任何一次重绘贴图都不会丢失用户作品，
+// 也保证制伞结束后进入撑伞环节仍然能看到自己画的内容。
+export const artCanvas = document.createElement('canvas');
+artCanvas.width = artCanvas.height = 1024;
+export const artCtx = artCanvas.getContext('2d');
+
 const PALETTE = { paper: '#e9e2d2', ink: '#334a48', sage: '#86a59a' };
 
-// 初始伞面采用淡墨山水纹样（用户仍可在绘纹步骤替换），加载完成后通知三维纹理刷新。
+// 初始伞面采用淡墨山水纹样，加载完成后通知三维纹理刷新。
 const starterPattern = new Image();
 starterPattern.onload = () => {
   if (!store.patternImg) {
@@ -23,9 +31,10 @@ starterPattern.onload = () => {
 };
 starterPattern.src = 'assets/default-silk-pattern.jpg';
 
-// 重绘伞面纹理（底纸 + 图案 + 伞骨放射线 + 外圈）
+// 重绘伞面纹理：底纸 + 底图 + 用户创作层 + 伞骨放射线 + 外圈
 export function drawTexture() {
   const ctx = texCtx;
+  ctx.clearRect(0, 0, 1024, 1024);
   ctx.fillStyle = PALETTE.paper;
   ctx.fillRect(0, 0, 1024, 1024);
   ctx.save();
@@ -40,20 +49,18 @@ export function drawTexture() {
     const img = store.patternImg;
     const ratio = Math.max(980 / img.width, 980 / img.height) * s;
     ctx.drawImage(img, -img.width * ratio / 2, -img.height * ratio / 2, img.width * ratio, img.height * ratio);
+  } else if (starterPattern.complete && starterPattern.naturalWidth > 0) {
+    ctx.drawImage(starterPattern, 0, 0, 1024, 1024);
   } else {
-    // 默认是从用户提供的淡墨山水参考图提炼而来的轻柔绢面纹样。
-    // 图片还未加载时采用柔和留白，避免旧版大面积绿色圆点。
-    if (starterPattern.complete && starterPattern.naturalWidth > 0) {
-      ctx.drawImage(starterPattern, 0, 0, 1024, 1024);
-    } else {
-      const mist = ctx.createRadialGradient(512, 560, 50, 512, 560, 520);
-      mist.addColorStop(0, '#e2e9e1');
-      mist.addColorStop(.7, '#edf0e7');
-      mist.addColorStop(1, '#f3f0e8');
-      ctx.fillStyle = mist;
-      ctx.fillRect(0, 0, 1024, 1024);
-    }
+    const mist = ctx.createRadialGradient(512, 560, 50, 512, 560, 520);
+    mist.addColorStop(0, '#e2e9e1');
+    mist.addColorStop(.7, '#edf0e7');
+    mist.addColorStop(1, '#f3f0e8');
+    ctx.fillStyle = mist;
+    ctx.fillRect(0, 0, 1024, 1024);
   }
+  // 叠加用户创作层（纹样 + 手绘）
+  ctx.drawImage(artCanvas, 0, 0);
   ctx.restore();
   // 伞骨放射线
   ctx.strokeStyle = '#334a4840';
@@ -70,6 +77,14 @@ export function drawTexture() {
   ctx.beginPath();
   ctx.arc(512, 512, 490, 0, Math.PI * 2);
   ctx.stroke();
+  // 通知所有三维伞实例刷新贴图（不重绘，只置脏）
+  window.dispatchEvent(new Event('silk-texture-refresh'));
+}
+
+// 清空用户创作层
+export function clearArtwork() {
+  artCtx.clearRect(0, 0, 1024, 1024);
+  drawTexture();
 }
 
 export const SCENES = [

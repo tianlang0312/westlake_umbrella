@@ -62,17 +62,20 @@ function highlight(part) {
 
 function onScroll() {
   if (!scrollEl || !umb || document.getElementById('view-know').classList.contains('hidden')) return;
-  let p;
-  if (matchMedia('(max-width: 960px)').matches) {
-    const box = scrollEl.getBoundingClientRect();
-    const total = Math.max(1, box.height - window.innerHeight * 0.4);
-    p = Math.min(1, Math.max(0, (-box.top + window.innerHeight * 0.4) / total));
-  } else {
-    const max = scrollEl.scrollHeight - scrollEl.clientHeight;
-    p = max > 0 ? scrollEl.scrollTop / max : 0;
-  }
-  umb.targetOpen = Math.min(1, p * 1.15); // 滚动推进开伞
-  document.getElementById('knowPct').textContent = '开卷 ' + Math.round(p * 100) + '%';
+  const sections = scrollEl.querySelectorAll('.know-section');
+  const total = Math.max(1, sections.length - 1);
+  // 按"当前停留在第几段"计算开伞程度：滚动吸附后一次直接跨一段，
+  // 所以开伞也随之从第 N 步直接跳到第 N+1 步，不保留中间过渡。
+  const base = scrollEl.getBoundingClientRect().top;
+  const probe = base + scrollEl.clientHeight * .5;
+  let idx = 0;
+  sections.forEach((s, i) => {
+    if (s.getBoundingClientRect().top <= probe) idx = i;
+  });
+  idx = Math.max(0, Math.min(total, idx));
+  const ratio = idx / total;
+  umb.setOpenness(ratio, ratio === 0 || ratio === 1);
+  document.getElementById('knowPct').textContent = '开卷 ' + Math.round(ratio * 100) + '%';
 }
 
 export function leaveKnow() { umb && umb.stop(); }

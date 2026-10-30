@@ -1,9 +1,10 @@
 // 第二幕 · 制伞：六步工序交互（选竹→削骨→组装→绷绸→绘纹→收饰）
 import { UmbrellaScene } from '../umbrella.js';
-import { store, texCtx, drawTexture } from '../store.js';
+import { store, texCtx, artCtx, drawTexture, clearArtwork } from '../store.js';
 import { playClick, playOpen } from '../audio.js';
 
 let umb = null, cur = 0, bound = false;
+let brushMode = 'pen', brushSize = 8, curColor = '#334a48', hasStrokes = false;
 const STEP_NAMES = ['选竹', '削骨', '组装', '绷绸', '绘纹', '收饰'];
 const STEP_KEYS = ['zhu', 'gu', 'zhuang', 'hu', 'hui', 'you'];
 const EGGS = {
@@ -22,14 +23,9 @@ export function enterMake() {
     umb.bindDrag();
   }
   umb.start();
-  // 根据进度恢复伞的状态
-  umb.setRibCount(store.stepsDone.gu ? 16 : store.stepsDone.zhu ? 4 : 0);
-  umb.setCanopyVisible(store.stepsDone.hu);
-  umb.setOiled(store.stepsDone.you);
-  umb.setOpenness(store.stepsDone.zhuang ? .6 : .2, true);
   if (!bound) {
     bound = true;
-    document.getElementById('stepPrev').onclick = () => go(cur - 1);
+    document.getElementById('stepPrev').onclick = () => go(cur - 1, true);
     document.getElementById('stepNext').onclick = () => go(cur + 1);
   }
   go(firstUndone());
@@ -42,11 +38,43 @@ function firstUndone() {
   return i === -1 ? 5 : i;
 }
 
-function go(n) {
+// 把右侧三维伞还原成"第 i 步刚开始"的样子
+function applyStepVisual(i) {
+  if (!umb) return;
+  umb.setCanopyOpacity(1);
+  if (i <= 2) {
+    // 选竹 / 削骨 / 组装：只有骨架，无伞面
+    umb.setCanopyVisible(false);
+    umb.setOiled(false);
+    umb.setRibCount([0, 4, 16][i]);
+    umb.setOpenness(.2, true);
+  } else if (i === 3) {
+    // 绷绸起点：骨架已张开，伞面尚未绷上
+    umb.setCanopyVisible(false);
+    umb.setOiled(false);
+    umb.setRibCount(16);
+    umb.setOpenness(.6, true);
+  } else {
+    // 绘纹 / 收饰：伞面可见，收饰前仍是哑光
+    umb.setCanopyVisible(true);
+    umb.setRibCount(16);
+    umb.setOiled(i === 5 ? false : store.stepsDone.you);
+    umb.setOpenness(.6, true);
+  }
+  drawTexture();
+}
+
+function go(n, back = false) {
+  const prev = cur;
   cur = Math.max(0, Math.min(5, n));
+  // 回退时把当前步及之后的所有步骤状态清空，左侧进度与右侧伞同时回退
+  if (back && cur < prev) {
+    for (let k = cur; k < STEP_KEYS.length; k++) store.stepsDone[STEP_KEYS[k]] = false;
+  }
   renderProgress();
   renderStep();
   updateNav();
+  applyStepVisual(cur);
   const egg = document.getElementById('knowledgeEgg');
   egg.classList.remove('hidden');
   egg.textContent = EGGS[STEP_KEYS[cur]];
@@ -187,7 +215,7 @@ const THEMES = {
   huaniao: { name: '花鸟', fn: drawHuaniao },
   yanyu: { name: '烟雨', fn: drawYanyu },
 };
-let curTheme = 'shanshui', curColor = '#334a48';
+let curTheme = 'shanshui';
 
 function renderHui(body) {
   body.innerHTML = `
@@ -197,6 +225,12 @@ function renderHui(body) {
     `<button class="pattern-item ${k === curTheme ? 'active' : ''}" data-t="${k}">${v.name}</button>`).join('')}
     </div>
     <div class="field"><label>配色</label><div class="color-row" id="colorRow"></div></div>
+    <div class="brush-toolbar">
+      <button class="tool-btn active" data-tool="pen">✏️ 画笔</button>
+      <button class="tool-btn" data-tool="eraser">🩹 橡皮擦</button>
+      <button class="tool-btn" id="clearArt">🗑 清除</button>
+    </div>
+    <div class="field"><label>画笔粗细 <b id="bsv">8</b></label><input type="range" id="brushSize" min="2" max="40" value="8"></div>
     <div class="field"><label>提笔绘制（在下方纸面拖动）</label><canvas class="draw-pad" id="drawPad" width="512" height="512"></canvas></div>
     <details class="field"><summary style="cursor:pointer;font-size:13px">📷 也可以上传照片，AI 国风化处理</summary>
       <div class="field"><input type="file" id="huiUpload" accept="image/png,image/jpeg,image/webp,image/bmp"></div>
@@ -206,13 +240,9 @@ function renderHui(body) {
       <p class="step-desc">推荐使用“空灵水墨”或“江南淡彩”，整体会更接近浅墨山水、留白充足的国风效果。</p>
       <button class="btn-primary" id="huiConvert">生成并映射到伞面</button>
       <p class="step-desc" id="huiMsg"></p>
-    </details>
-    <div class="row-flex">
-      <div class="field" style="flex:1"><label>缩放 <span id="sv">${store.scale}%</span></label><input type="range" id="scaleR" min="50" max="180" value="${store.scale}"></div>
-      <div class="field" style="flex:1"><label>旋转 <span id="rv">${store.rotate}°</span></label><input type="range" id="rotR" min="-180" max="180" value="${store.rotate}"></div>
-    </div>`;
+    </details>`;
 
-  // 配色
+  // 配色：既是画笔颜色；若伞面还没有手绘笔迹，也会重绘当前纹样的配色
   const colors = ['#334a48', '#86a59a', '#d8a6a1', '#c9a063', '#5d4037', '#2e4057'];
   const row = body.querySelector('#colorRow');
   colors.forEach(c => {
@@ -223,48 +253,110 @@ function renderHui(body) {
       curColor = c;
       row.querySelectorAll('.color-dot').forEach(x => x.classList.remove('active'));
       d.classList.add('active');
-      THEMES[curTheme].fn(curColor);
-      umb.refreshTexture();
+      if (!hasStrokes) {
+        THEMES[curTheme].fn(curColor);
+        redrawPad();
+      } else if (window.toast) {
+        window.toast('已切换画笔颜色；重新选择纹样可同时改纹样配色');
+      }
     };
     row.appendChild(d);
   });
 
-  // 主题
+  // 纹样元素：点击后重新生成整幅纹样
   body.querySelectorAll('.pattern-item').forEach(b => {
     b.onclick = () => {
       curTheme = b.dataset.t;
       body.querySelectorAll('.pattern-item').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
+      hasStrokes = false;
       THEMES[curTheme].fn(curColor);
-      umb.refreshTexture();
       redrawPad();
     };
   });
 
-  // 画板（直接画到纹理画布）
+  // 画笔工具：画笔 / 橡皮擦 / 清除
+  body.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
+    b.onclick = () => {
+      brushMode = b.dataset.tool;
+      body.querySelectorAll('.tool-btn[data-tool]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      playClick();
+    };
+  });
+  const sizeInput = body.querySelector('#brushSize');
+  sizeInput.oninput = () => {
+    brushSize = +sizeInput.value;
+    body.querySelector('#bsv').textContent = brushSize;
+  };
+  brushSize = +sizeInput.value;
+  body.querySelector('#clearArt').onclick = () => {
+    playClick();
+    hasStrokes = false;
+    clearArtwork();
+    redrawPad();
+    if (window.toast) window.toast('已清除伞面上的绘纹');
+  };
+
+  // 画板：所有笔迹只写入用户创作层，因此翻页/切换环节都不会丢失
   const pad = body.querySelector('#drawPad');
   redrawPad();
-  let drawing = false;
+  let drawing = false, last = null;
+  let pending = false;
   const pos = e => {
     const r = pad.getBoundingClientRect();
     return [(e.clientX - r.left) / r.width * 1024, (e.clientY - r.top) / r.height * 1024];
   };
-  pad.addEventListener('pointerdown', e => { drawing = true; try { pad.setPointerCapture(e.pointerId); } catch (_) { } const [x, y] = pos(e); dot(x, y); });
-  pad.addEventListener('pointerup', () => drawing = false);
-  pad.addEventListener('pointermove', e => { if (drawing) { const [x, y] = pos(e); dot(x, y); } });
-  function dot(x, y) {
-    texCtx.save();
-    texCtx.beginPath(); texCtx.arc(512, 512, 490, 0, Math.PI * 2); texCtx.clip();
-    texCtx.fillStyle = curColor;
-    texCtx.beginPath(); texCtx.arc(x, y, 7, 0, Math.PI * 2); texCtx.fill();
-    texCtx.restore();
-    umb.texture.needsUpdate = true;
-    redrawPad();
+  // 每帧最多重绘一次贴图，保证拖动画笔时流畅
+  function scheduleTexture() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => {
+      pending = false;
+      drawTexture();
+      redrawPad();
+    });
   }
-
-  // 缩放旋转
-  body.querySelector('#scaleR').oninput = e => { store.scale = +e.target.value; body.querySelector('#sv').textContent = store.scale + '%'; umb.refreshTexture(); redrawPad(); };
-  body.querySelector('#rotR').oninput = e => { store.rotate = +e.target.value; body.querySelector('#rv').textContent = store.rotate + '°'; umb.refreshTexture(); redrawPad(); };
+  function paint(from, to) {
+    artCtx.save();
+    artCtx.beginPath();
+    artCtx.arc(512, 512, 490, 0, Math.PI * 2);
+    artCtx.clip();
+    const erasing = brushMode === 'eraser';
+    artCtx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+    artCtx.strokeStyle = erasing ? '#000' : curColor;
+    artCtx.fillStyle = erasing ? '#000' : curColor;
+    artCtx.lineWidth = brushSize * 2;
+    artCtx.lineCap = 'round';
+    artCtx.lineJoin = 'round';
+    if (from && (from[0] !== to[0] || from[1] !== to[1])) {
+      artCtx.beginPath();
+      artCtx.moveTo(from[0], from[1]);
+      artCtx.lineTo(to[0], to[1]);
+      artCtx.stroke();
+    } else {
+      artCtx.beginPath();
+      artCtx.arc(to[0], to[1], brushSize, 0, Math.PI * 2);
+      artCtx.fill();
+    }
+    artCtx.restore();
+    if (!erasing) hasStrokes = true;
+    scheduleTexture();
+  }
+  pad.addEventListener('pointerdown', e => {
+    drawing = true;
+    try { pad.setPointerCapture(e.pointerId); } catch (_) { }
+    last = pos(e);
+    paint(last, last);
+  });
+  pad.addEventListener('pointerup', () => { drawing = false; last = null; });
+  pad.addEventListener('pointercancel', () => { drawing = false; last = null; });
+  pad.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const p = pos(e);
+    paint(last, p);
+    last = p;
+  });
 
   // 上传 AI 风格化（沿用原后端接口）
   body.querySelector('#huiConvert').onclick = async () => {
@@ -279,7 +371,7 @@ function renderHui(body) {
       const res = await r.json();
       if (!r.ok) throw Error(res.error || '处理失败');
       const img = new Image();
-      img.onload = () => { store.patternImg = img; umb.refreshTexture(); redrawPad(); msg.textContent = '已映射到伞面！'; };
+      img.onload = () => { store.patternImg = img; drawTexture(); redrawPad(); msg.textContent = '已映射到伞面！'; };
       img.src = res.image;
     } catch (e) { msg.textContent = '错误：' + e.message; }
   };
@@ -293,26 +385,22 @@ function redrawPad() {
   pad.getContext('2d').drawImage(texCtx.canvas, 0, 0, 512, 512);
 }
 
-/* 主题纹样绘制（画在纹理画布上） */
+/* 主题纹样绘制：只画在用户创作层，绘制完由 drawTexture 统一合成 */
 function themeBase(color) {
+  // 选择新纹样时，先清掉上一次纹样与手绘笔迹
+  artCtx.clearRect(0, 0, 1024, 1024);
   store.patternImg = null;
-  drawTexture();
-  texCtx.save();
-  texCtx.beginPath(); texCtx.arc(512, 512, 490, 0, Math.PI * 2); texCtx.clip();
-  texCtx.strokeStyle = texCtx.fillStyle = color;
-  return texCtx;
+  artCtx.save();
+  artCtx.beginPath();
+  artCtx.arc(512, 512, 490, 0, Math.PI * 2);
+  artCtx.clip();
+  artCtx.globalAlpha = 1;
+  artCtx.strokeStyle = artCtx.fillStyle = color;
+  return artCtx;
 }
-function themeEnd() { texCtx.restore(); overlayRibs(); }
-
-function overlayRibs() {
-  texCtx.strokeStyle = '#334a4840'; texCtx.lineWidth = 3;
-  for (let i = 0; i < 16; i++) {
-    const a = i * Math.PI / 8;
-    texCtx.beginPath(); texCtx.moveTo(512, 512);
-    texCtx.lineTo(512 + 490 * Math.cos(a), 512 + 490 * Math.sin(a)); texCtx.stroke();
-  }
-  texCtx.strokeStyle = '#334a48'; texCtx.lineWidth = 10;
-  texCtx.beginPath(); texCtx.arc(512, 512, 490, 0, Math.PI * 2); texCtx.stroke();
+function themeEnd() {
+  artCtx.restore();
+  drawTexture();
 }
 
 function drawShanshui(color) {

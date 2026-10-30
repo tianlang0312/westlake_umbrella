@@ -4,9 +4,13 @@ let rainNode = null;
 let enabled = true;
 
 function ac() {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if (ctx.state === 'suspended') ctx.resume();
-  return ctx;
+  try {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  } catch (e) {
+    return null; // 浏览器不支持/禁用音频时静默降级，不影响页面交互
+  }
 }
 
 export function setSound(on) {
@@ -20,6 +24,7 @@ export function isSoundOn() { return enabled; }
 export function startRain(volume = 0.12) {
   if (!enabled || rainNode) return;
   const a = ac();
+  if (!a) return;
   const len = a.sampleRate * 2;
   const buf = a.createBuffer(1, len, a.sampleRate);
   const d = buf.getChannelData(0);
@@ -36,7 +41,10 @@ export function startRain(volume = 0.12) {
 }
 
 export function setRainVolume(v) {
-  if (rainNode) rainNode.gain.gain.linearRampToValueAtTime(v, ac().currentTime + 0.5);
+  if (!rainNode) return;
+  const a = ac();
+  if (!a) return;
+  rainNode.gain.gain.linearRampToValueAtTime(v, a.currentTime + 0.5);
 }
 
 export function stopRain() {
@@ -46,7 +54,9 @@ export function stopRain() {
 // 开伞：低频闷响 + 短噪声
 export function playOpen() {
   if (!enabled) return;
-  const a = ac(), t = a.currentTime;
+  const a = ac();
+  if (!a) return;
+  const t = a.currentTime;
   const osc = a.createOscillator(), g = a.createGain();
   osc.type = 'sine';
   osc.frequency.setValueAtTime(120, t);
@@ -61,7 +71,9 @@ export function playOpen() {
 // 收伞：下滑摩擦声
 export function playClose() {
   if (!enabled) return;
-  const a = ac(), t = a.currentTime;
+  const a = ac();
+  if (!a) return;
+  const t = a.currentTime;
   noiseBurst(a, t, 0.3, 500, 0.2, 1800);
 }
 
@@ -84,7 +96,9 @@ function noiseBurst(a, t, dur, freq, vol, sweepTo) {
 
 export function playClick() {
   if (!enabled) return;
-  const a = ac(), t = a.currentTime;
+  const a = ac();
+  if (!a) return;
+  const t = a.currentTime;
   const osc = a.createOscillator(), g = a.createGain();
   osc.type = 'triangle';
   osc.frequency.value = 660;

@@ -33,9 +33,15 @@ function route() {
 
 window.addEventListener('hashchange', route);
 
-// 落地页按钮
-document.getElementById('btnStart').onclick = () => { playClick(); location.hash = '#/make'; };
-document.getElementById('btnKnow').onclick = () => { playClick(); location.hash = '#/know'; };
+// 落地页按钮：跳转不依赖音效，音效异常也不能拦下导航
+function go(routeName) {
+  try { playClick(); } catch (_) { }
+  location.hash = '#/' + routeName;
+  // 若已经处于目标 hash，hashchange 不会触发，这里直接再走一次路由
+  if (current !== routeName) route();
+}
+document.getElementById('btnStart').onclick = () => go('make');
+document.getElementById('btnKnow').onclick = () => go('know');
 
 // 声音开关（两处）
 function bindSound(id) {
