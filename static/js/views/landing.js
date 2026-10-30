@@ -3,6 +3,7 @@ import { UmbrellaScene } from '../umbrella.js';
 import { drawTexture } from '../store.js';
 
 let umb = null;
+let stopRainCanvas = null;
 
 // 2D 雨幕背景
 function startRainCanvas(canvas) {
@@ -19,9 +20,10 @@ function startRainCanvas(canvas) {
   resize();
   window.addEventListener('resize', resize);
   let running = true;
+  let rafId = 0;
   (function frame() {
     if (!running) return;
-    requestAnimationFrame(frame);
+    rafId = requestAnimationFrame(frame);
     if (!document.contains(canvas)) { running = false; return; }
     ctx.clearRect(0, 0, w, h);
     ctx.strokeStyle = 'rgba(200,220,235,.35)';
@@ -35,6 +37,12 @@ function startRainCanvas(canvas) {
     }
     ctx.stroke();
   })();
+  return () => {
+    running = false;
+    cancelAnimationFrame(rafId);
+    window.removeEventListener('resize', resize);
+    ctx.clearRect(0, 0, w, h);
+  };
 }
 
 export function enterLanding() {
@@ -45,7 +53,12 @@ export function enterLanding() {
     umb.angleX = .18;
   }
   umb.start();
-  startRainCanvas(document.getElementById('landingRain'));
+  stopRainCanvas?.();
+  stopRainCanvas = startRainCanvas(document.getElementById('landingRain'));
 }
 
-export function leaveLanding() { umb && umb.stop(); }
+export function leaveLanding() {
+  umb && umb.stop();
+  stopRainCanvas?.();
+  stopRainCanvas = null;
+}

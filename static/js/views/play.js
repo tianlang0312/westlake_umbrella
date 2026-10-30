@@ -13,18 +13,11 @@ let skelCtx = null;
 export function enterPlay() {
   drawTexture();
   if (!umb) {
-    umb = new UmbrellaScene(document.getElementById('playCanvas'), { night: true });
+    umb = new UmbrellaScene(document.getElementById('playCanvas'), { night: false });
     umb.bindDrag();
-    umb.openness = umb.targetOpen = .12; // 初始收伞
+    umb.setOpenness(0, true); // 初始为实际的细长束状收伞，而非缩小圆盘
     umb.angleX = .12;
-    // 地面（雨夜湿意）
-    const ground = new THREE.Mesh(
-      new THREE.CircleGeometry(16, 48),
-      new THREE.MeshStandardMaterial({ color: 0x22303c, roughness: .35, metalness: .5 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -2.6;
-    umb.scene.add(ground);
+    // 舞台直接透出网页中的烟雨水墨湖景，不再放深色地面圆盘。
     rain = new RainSystem(umb.scene);
   }
   umb.start();
@@ -35,7 +28,7 @@ export function enterPlay() {
     bindUI();
   }
   animateRain();
-  setStatus('江南夜雨。启用手势或手动模式，撑开你的伞。');
+  setStatus('烟雨西湖。启用手势或手动模式，撑开你的绸伞。');
 }
 
 export function leavePlay() {
@@ -54,6 +47,11 @@ function animateRain() {
     rainRAF = requestAnimationFrame(loop);
     if (document.getElementById('view-play').classList.contains('hidden')) return;
     rain.update({ openness: umb.openness, x: umb.root.position.x, z: umb.root.position.z });
+    const slider = document.getElementById('playFoldSlider');
+    if (slider && document.activeElement !== slider) {
+      slider.value = Math.round(umb.openness * 100);
+      document.getElementById('foldValue').textContent = Math.round(umb.openness * 100) + '%';
+    }
     checkSceneTip();
   };
   loop();
@@ -87,8 +85,8 @@ function bindUI() {
     onFist: () => { if (!finished) { umb.close(); playClose(); setStatus('识别：握拳 → 伞收拢，雨淋下来了'); } },
     onMove: (dx, dy) => {
       if (finished) return;
-      umb.root.position.x = Math.max(-4, Math.min(4, umb.root.position.x + dx * 6));
-      umb.angleX = Math.max(-.6, Math.min(.65, umb.angleX + dy * 1.5));
+      umb.angleY += dx * 3; // 平移手掌 → 绕竖轴旋转视角
+      umb.angleX = Math.max(-.85, Math.min(.85, umb.angleX + dy * 2));
     },
     onTurn: da => { umb.angleY += da * 2; },
     onFrame: drawSkeleton,
@@ -119,13 +117,21 @@ function bindUI() {
   };
   document.getElementById('playOpen').onclick = () => { umb.open(); playOpen(); };
   document.getElementById('playClose').onclick = () => { umb.close(); playClose(); };
+  // 调试/课堂演示：手动拖动从完全收拢到完全张开，同步保持 Three.js 伞骨和褶皱变形。
+  const foldSlider = document.getElementById('playFoldSlider');
+  foldSlider.addEventListener('input', () => {
+    const value = Number(foldSlider.value) / 100;
+    umb.setOpenness(value, true);
+    document.getElementById('foldValue').textContent = Math.round(value * 100) + '%';
+    setStatus(value < .15 ? '真实收拢形态：纵向折褶、伞骨垂落、系带束起' : value > .85 ? '伞骨撑起，伞面展开' : '伞骨绕伞顶转动，绸面随骨架连续折叠');
+  });
 
   document.getElementById('playFinish').onclick = finishExperience;
   document.getElementById('cardClose').onclick = () => document.getElementById('cardModal').classList.add('hidden');
   document.getElementById('cardGen').onclick = genCard;
   document.getElementById('cardSave').onclick = () => {
     const a = document.createElement('a');
-    a.download = '一伞烟雨_纪念卡.png';
+    a.download = '伞间西湖_绸伞纪念卡.png';
     a.href = document.getElementById('cardCanvas').toDataURL('image/png');
     a.click();
   };
@@ -173,7 +179,7 @@ function finishExperience() {
       stopRain();
       setTimeout(() => {
         document.getElementById('cardModal').classList.remove('hidden');
-        document.getElementById('workName').value = store.workName === '我的油纸伞' ? '' : store.workName;
+        document.getElementById('workName').value = store.workName === '我的西湖绸伞' ? '' : store.workName;
         genCard();
       }, 600);
     }
@@ -220,10 +226,10 @@ function genCard() {
   ctx.fillStyle = '#334a48';
   ctx.textAlign = 'center';
   ctx.font = '500 44px "PingFang SC","Microsoft Yahei",serif';
-  ctx.fillText('一 伞 烟 雨', 450, 150);
+  ctx.fillText('伞 间 西 湖', 450, 150);
   ctx.font = '20px serif';
   ctx.fillStyle = '#6b7f7a';
-  ctx.fillText('—— 油纸伞非遗智能交互体验 · 纪念卡 ——', 450, 195);
+  ctx.fillText('—— 西湖绸伞 · 数字互动典藏卡 ——', 450, 195);
 
   // 作品名
   ctx.font = '500 52px "PingFang SC","Microsoft Yahei",serif';

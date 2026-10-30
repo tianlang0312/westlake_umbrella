@@ -1,0 +1,355 @@
+/*
+  伞间西湖 · 烟雨主题 2026
+  全局视觉重设计：不更改原有交互逻辑和组件 ID。
+  Theme palette: 绢丝米白 / 西湖青绿 / 荷花淡粉 / 竹墨深青
+*/
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+:root {
+  --cream:#e9e2d2; --sage:#86a59a; --pink:#d8a6a1; --dark:#334a48;
+  --paper:#f8f7f1; --paper-deep:#ecebe2; --ink:#344c49; --muted:#7d918a;
+  --gold:#b49a72; --line:rgba(74,109,101,.18); --glass:rgba(251,250,245,.76);
+  --serif:'Noto Serif SC','Songti SC','STSong','SimSun',serif;
+}
+html { scroll-behavior:smooth; }
+body { background:#f8f7f2; color:var(--ink); font-family:'PingFang SC','Microsoft Yahei',system-ui,sans-serif; }
+button,input,select { font-family:inherit; }
+button { transition: background .22s ease, color .22s ease, border-color .22s ease, transform .22s ease, box-shadow .22s ease; }
+button:not(:disabled):hover { transform:translateY(-2px); }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid #7ba59a; outline-offset:3px; }
+::selection { background:#a8c4ba88; }
+::-webkit-scrollbar { width:7px; height:7px; }
+::-webkit-scrollbar-thumb { background:#9eb1aa80; border-radius:10px; }
+::-webkit-scrollbar-track { background:#efeee8; }
+.view { isolation:isolate; }
+
+/* 细腻宣纸纤维与浅色噪点，全站共用 */
+#view-landing::after,#view-know::after,#view-make::after,#view-play::after {
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.17;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.18' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --------- Navigation · 玉白轻纱 --------- */
+#topnav {
+  height:76px; padding:0 clamp(24px,5vw,82px); gap:18px;
+  border-bottom:1px solid rgba(88,119,111,.17);
+  background:rgba(249,249,244,.9); color:var(--ink); backdrop-filter:blur(20px) saturate(1.3);
+  box-shadow:0 10px 35px rgba(39,72,65,.035);
+}
+.nav-brand,.landing-logo { display:inline-flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink); white-space:nowrap; }
+#topnav .nav-brand { color:var(--ink); padding:0; border:0; }
+.brand-copy,.landing-logo>span:last-child { display:flex; flex-direction:column; gap:3px; }
+.brand-copy b,.landing-logo b { font-family:var(--serif); font-weight:700; font-size:19px; letter-spacing:.2em; }
+.brand-copy small,.landing-logo small { color:#7e938b; font-size:8px; letter-spacing:.19em; font-weight:600; }
+.brand-seal {
+  width:42px; height:42px; background:#915f52; color:#f7eee4;
+  display:grid; place-items:center; font-family:var(--serif); font-size:19px;
+  border-radius:4px 8px 4px 8px; outline:1px solid #ffffff75; outline-offset:-5px; transform:rotate(-4deg);
+  box-shadow:0 4px 10px rgba(102,57,39,.12);
+}
+.nav-links { display:flex; gap:clamp(12px,2.4vw,34px); align-items:center; margin:auto; }
+#topnav .nav-links a { color:#758c84; font-size:13px; letter-spacing:.14em; padding:26px 4px; border-bottom:2px solid transparent; }
+#topnav .nav-links a span { font:10px Georgia,serif; color:#a1b3ac; margin-right:4px; }
+#topnav .nav-links a:hover,#topnav .nav-links a.active { color:#314e48; border-bottom-color:#8dafa3; }
+.nav-btn { margin-left:0; color:#627b70; border:1px solid rgba(84,117,109,.28); background:#ffffff65; padding:9px 17px; border-radius:40px; letter-spacing:.1em; }
+.nav-btn:hover { background:#e5eee8; }
+
+/* --------- Buttons --------- */
+.btn-primary,.btn-ghost,.btn-gold { font-size:13px; letter-spacing:.13em; font-weight:500; padding:14px 23px; border-radius:3px; }
+.btn-primary { color:#f9f6ed; border:1px solid #355a53; background:#3c625a; box-shadow:0 11px 26px rgba(56,97,86,.12); }
+.btn-primary:hover:not(:disabled) { background:#294c45; box-shadow:0 14px 30px rgba(56,97,86,.2); }
+.btn-ghost { border:1px solid rgba(56,93,83,.32); color:#405f55; background:rgba(255,255,255,.57); }
+.btn-ghost:hover:not(:disabled) { background:#fff; border-color:#567d6f; }
+.btn-gold { background:#ad8f68; border:1px solid #ad8f68; color:#fffdf7; }
+.btn-gold:hover:not(:disabled) { background:#987855; }
+.btn-mini { background:#f9f9f0dd; border:1px solid #bbcdc1; color:#3f6155; border-radius:3px; padding:9px 14px; }
+
+/* --------- Landing · 大幅浅墨风景 --------- */
+#view-landing { min-height:100svh; height:auto; position:relative; overflow:hidden; display:flex; flex-direction:column; background:#f5f4ec; }
+.hero-scene {
+  position:absolute; inset:0; z-index:0;
+  background-image:
+    linear-gradient(90deg,rgba(248,247,241,.99) 0%,rgba(248,247,241,.95) 28%,rgba(248,247,241,.52) 61%,rgba(248,247,241,.28) 100%),
+    linear-gradient(180deg,rgba(245,246,239,.7) 0%,rgba(245,246,239,.03) 48%,rgba(248,247,241,.96) 100%),
+    url('../assets/ink-lake-pavilion.jpg');
+  background-position:center,center,center 64%; background-size:cover;
+  filter:saturate(.68);
+}
+.hero-scene::before,.hero-scene::after { content:''; position:absolute; left:-12%; width:124%; border-radius:50%; pointer-events:none; }
+.hero-scene::before { top:41%; height:18%; background:rgba(248,248,241,.50); filter:blur(55px); animation:mistDrift 19s ease-in-out infinite alternate; }
+.hero-scene::after { bottom:9%; height:18%; background:rgba(250,249,243,.6); filter:blur(46px); animation:mistDrift 24s ease-in-out infinite alternate-reverse; }
+@keyframes mistDrift { from{ transform:translateX(-2%) scaleX(1); }to{ transform:translateX(4%) scaleX(.92); } }
+.landing-rain { z-index:1; opacity:.27; mix-blend-mode:multiply; }
+.landing-nav { position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:clamp(17px,2.8vh,31px) clamp(24px,5.6vw,90px) 0; }
+.landing-nav-tag { margin-left:auto; margin-right:35px; font-size:11px; letter-spacing:.25em; color:#83988f; }
+.landing-hero { width:min(1400px,100%); align-self:center; flex:1; display:grid; grid-template-columns:52% 48%; align-items:center; padding:6vh clamp(28px,5.5vw,88px) 4vh; text-align:left; color:var(--ink); }
+.hero-copy { position:relative; align-self:center; z-index:6; padding:0 12px 0 4%; }
+.eyebrow { display:flex; align-items:center; gap:12px; font-size:12px; letter-spacing:.3em; color:#82998e; white-space:nowrap; }
+.eyebrow-line { height:1px; width:30px; background:#86a59a; opacity:.8; }
+.hero-poetry { margin:34px 0 6px 2px; font-family:var(--serif); letter-spacing:.3em; font-size:15px; color:#8caa9f; writing-mode:horizontal-tb; }
+.landing-title { margin:0 0 15px; font-family:var(--serif); font-size:clamp(52px,6.1vw,99px); font-weight:600; letter-spacing:.09em; color:#344c46; line-height:1.24; text-shadow:none; white-space:nowrap; }
+.landing-title span { color:#b0957b; font-size:.56em; margin:0 .12em; vertical-align:12%; }
+.landing-sub { color:#526d62; font-family:var(--serif); font-size:clamp(15px,1.5vw,20px); font-weight:500; letter-spacing:.22em; margin:11px 0 24px; }
+.landing-slogan { font-size:14px; color:#72867d; line-height:2.25; letter-spacing:.11em; margin:0 0 36px; }
+.landing-actions { display:flex; gap:13px; flex-wrap:wrap; }
+.landing-actions button { min-width:172px; padding:16px 22px; font-size:13px; }
+.landing-actions button span { margin-left:14px; font-size:16px; }
+.landing-actions .btn-primary { background:#365d54; border-color:#365d54; color:#fff; }
+.landing-actions .btn-ghost { background:rgba(255,255,255,.36); border-color:#98aba1; color:#49675c; }
+.hero-small-note { margin-top:42px; display:flex; gap:13px; align-items:center; flex-wrap:wrap; font-size:10px; letter-spacing:.1em; color:#8ca39a; }
+.hero-small-note i { width:3px; height:3px; border-radius:50%; background:#b29b80; }
+.ink-dot { background:#b58e73; display:inline-block; width:6px; height:6px; border-radius:50%; }
+.hero-art { height:min(68vh,670px); min-height:420px; width:100%; display:grid; place-items:center; position:relative; align-self:center; isolation:isolate; }
+.hero-art-arch { position:absolute; width:91%; aspect-ratio:1/1; border-radius:50%; z-index:-1;
+  background:radial-gradient(circle at 50% 46%,rgba(255,255,250,.9) 0%,rgba(241,242,231,.5) 57%,rgba(209,223,214,.16) 74%,transparent 75%);
+  box-shadow:inset 0 0 0 1px #678a7b22,inset 0 0 0 16px #fff4;
+  outline:1px solid #79998b2d; outline-offset:14px; }
+.hero-art-arch::before { content:''; position:absolute; inset:32px; border:1px dashed rgba(88,123,110,.26); border-radius:50%; }
+.landing-umbrella { width:94%; height:94%; max-width:680px; max-height:680px; margin:auto; position:relative; transform:translate(2%,1%); filter:drop-shadow(0 35px 35px rgba(57,86,78,.13)); }
+.landing-umbrella canvas { width:100%; height:100%; }
+.hero-art-seal { position:absolute; right:0%; bottom:13%; padding:9px 7px; background:#a56354; color:#fff5eb; font:15px/1.26 var(--serif); border:1px solid #c99e8b; outline:1px solid #a56354; outline-offset:4px; border-radius:2px; text-align:center; letter-spacing:.13em; }
+.hero-art-label { position:absolute; color:#69877d; font:12px/1.9 var(--serif); letter-spacing:.15em; }
+.hero-art-label--top { right:3%; top:6%; writing-mode:vertical-rl; }
+.hero-art-label--bottom { bottom:3%; left:6%; font:10px Georgia,serif; letter-spacing:.23em; }
+.landing-bottom { width:100%; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:20px; padding:8px clamp(30px,6vw,95px) 16px; color:#7b978c; position:relative; z-index:4; }
+.hero-scroll { display:flex; gap:14px; align-items:center; font:10px Georgia,serif; letter-spacing:.13em; }
+.scroll-line { height:1px; width:45px; background:#9db5aa; }
+.landing-journey { display:flex; align-items:center; gap:17px; font:11px var(--serif); letter-spacing:.12em; }
+.journey-divider { width:28px; height:1px; background:#abbcb1; }
+.landing-number { text-align:right; font:13px Georgia,serif; letter-spacing:.17em; }
+.landing-footer { display:block; text-align:center; padding:8px 15px 15px; color:#93a49b; font-size:10px; letter-spacing:.16em; position:relative; z-index:4; }
+
+/* --------- Know · 长卷式画轴 --------- */
+#view-know { height:100svh; padding-top:76px; position:relative; background:#f7f7f1; }
+.know-layout { height:calc(100svh - 76px); grid-template-columns:minmax(470px,50%) minmax(0,50%); position:relative; z-index:1; }
+.know-scroll { scrollbar-color:#b1c3b9 #f7f7f1; }
+.know-section { min-height:calc(100svh - 76px); padding:9vh clamp(48px,7.4vw,120px); position:relative; }
+.know-section::before { content:''; position:absolute; top:7%; left:clamp(48px,7.4vw,120px); width:42px; height:1px; background:#b1c1b4; }
+.know-kicker { color:#7a9d90; font-size:11px; letter-spacing:.23em; line-height:1.8; margin-bottom:28px; }
+.know-section h2 { font-family:var(--serif); color:#36564c; font-size:clamp(30px,3.2vw,48px); line-height:1.65; letter-spacing:.12em; margin:0 0 23px; }
+.know-section h3 { font:600 clamp(25px,2.5vw,37px)/1.45 var(--serif); color:#36564c; letter-spacing:.12em; margin:4px 0 23px; }
+.know-section p { color:#71847a; font-size:14px; line-height:2.3; max-width:495px; }
+.section-verse { color:#9eafa4; font-family:var(--serif); letter-spacing:.25em; font-size:13px; margin-bottom:17px; }
+.chapter-index { color:#b29c7e!important; font:11px Georgia,serif!important; letter-spacing:.3em; }
+.scroll-hint { color:#89a99b!important; letter-spacing:.28em; font-size:11px!important; margin-top:22px; }
+.know-stage { overflow:hidden; background:linear-gradient(180deg,rgba(247,248,242,.48),rgba(240,243,236,.54)),url('../assets/ink-lake-mist.jpg') center 40% / cover no-repeat; }
+.know-stage::before,.make-stage::before { position:absolute; content:''; width:78%; height:80%; top:10%; left:10%; border-radius:50%; border:1px solid rgba(113,144,127,.18); pointer-events:none; box-shadow:0 0 0 28px #fff2; }
+.know-stage::after { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(0deg,#f7f7f0c8 0%,transparent 24%,transparent 70%,#f7f7f080); }
+.know-stage canvas { position:relative; z-index:2; }
+.stage-overline { position:absolute; z-index:4; left:37px; top:31px; font:12px var(--serif); color:#65877b; letter-spacing:.2em; pointer-events:none; }
+.stage-overline span { color:#c7af91; }
+.know-progress { z-index:4; top:29px; right:32px; background:#f9faf4ba; color:#678679; border-radius:2px; border:1px solid #a1b9a668; padding:9px 15px; font-size:11px; letter-spacing:.14em; }
+.stage-bottom-poem { position:absolute; z-index:4; right:36px; bottom:30px; color:#7e998b; font:12px var(--serif); letter-spacing:.32em; writing-mode:vertical-rl; }
+.timeline { border-left:1px solid #a7beb1; padding-left:27px; }
+.tl-item { padding:0 0 0 3px; margin-bottom:20px; }
+.tl-item::before { width:8px;height:8px; left:-32px;top:7px;background:#7ba18e; border:3px solid #f8f8f3; }
+.tl-item b { font:600 15px var(--serif); letter-spacing:.08em; }
+.tl-item span { font-size:13px; color:#71847c; }
+.hotspot-btn,.mat-card { background:#ffffffb8; color:#456c5b; border:1px solid #bfd0c5; border-radius:2px; }
+.hotspot-btn { padding:10px 22px; }
+.hotspot-btn.active { background:#5b8876; border-color:#5b8876; }
+.part-info { border-radius:3px; background:#ffffffa8; border:1px solid #e1e8db; box-shadow:none; color:#617d6d; padding:21px 24px; }
+.mat-card { padding:20px 8px; }
+.mat-card:hover { box-shadow:0 12px 30px #5c81791b; }
+.mat-card span { color:#849b8c; }
+.big-quote { font:500 clamp(23px,3vw,32px)/2.05 var(--serif); letter-spacing:.1em; }
+
+/* --------- Make · 绸伞工坊 --------- */
+#view-make { height:100svh; padding-top:76px; position:relative; background:#f6f7ef; }
+.make-layout { height:calc(100svh - 76px); grid-template-columns:minmax(365px,465px) minmax(0,1fr); position:relative; z-index:1; }
+.make-panel { background:linear-gradient(155deg,rgba(255,255,252,.98),rgba(245,247,238,.92)); border-right:1px solid #cbdacd; padding:clamp(20px,3vw,41px) clamp(22px,3.2vw,50px) 35px; }
+.make-panel>.know-kicker { margin-bottom:15px; font-size:10px; }
+.make-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
+.make-heading h2 { font:500 clamp(26px,2.3vw,34px)/1.42 var(--serif); letter-spacing:.14em; color:#36564c; margin:0; }
+.make-heading em { color:#779a89; font-style:normal; }
+.make-seal { color:#ac705d; border:1px solid #b88477; padding:6px; font:13px/1.4 var(--serif); flex-shrink:0; }
+.make-intro { color:#91a096; font-size:12px; line-height:1.9; margin:0 0 22px; }
+.step-progress { gap:5px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin:0 0 23px; border-top:1px solid #dbe6d9; padding-top:19px; }
+.step-progress .sp { text-align:center; background:#ebf0e9; color:#869c90; border:1px solid transparent; border-radius:2px; padding:8px 3px; font-size:11px; white-space:nowrap; }
+.step-progress .sp.cur { background:#4e7868; color:#fff; }
+.step-progress .sp.done { background:#dceae1; color:#547c65; border-color:#c4ddcf; }
+#stepBody { animation:fadein .4s ease; }
+#stepBody h3 { font:500 23px var(--serif); color:#45675a; letter-spacing:.12em; margin:0 0 12px; }
+#stepBody .step-desc { color:#82978b; font-size:12px; line-height:2; }
+.step-nav { margin-top:24px; gap:10px; }
+.step-nav button { flex:1; min-width:0; font-size:12px; padding:12px 10px; }
+.knowledge-egg { margin-top:20px; background:#f1f3e9; border:1px solid #dce4d9; border-left:2px solid #8db1a0; border-radius:2px; color:#7d9186; font-size:12px; padding:15px 17px; }
+.make-stage { overflow:hidden; background:linear-gradient(180deg,rgba(242,246,237,.72),rgba(245,247,239,.32) 57%,rgba(244,246,239,.97)), url('../assets/ink-lake-mist.jpg') center 59% /cover no-repeat; }
+.make-stage::after { position:absolute; inset:0; content:''; pointer-events:none; background:radial-gradient(circle at 51% 53%,rgba(255,255,255,.68),transparent 55%); }
+.make-stage canvas { z-index:2; position:relative; }
+.stage-number { position:absolute; right:4.5%; top:26px; z-index:4; font:24px var(--serif); color:#588475; }
+.stage-number span { color:#a3b8aa; font:11px Georgia,serif; }
+.stage-caption { position:absolute; bottom:69px; left:37px; z-index:4; display:flex; align-items:flex-start; gap:13px; color:#52766a; pointer-events:none; }
+.stage-caption-dot { margin-top:5px; width:7px; height:7px; background:#a88167; border-radius:50%; }
+.stage-caption strong { font:500 14px var(--serif); letter-spacing:.12em; display:block; margin-bottom:8px; }
+.stage-caption small { font-size:11px; color:#98aaa0; letter-spacing:.08em; }
+.make-stage .hint { bottom:21px; z-index:4; font-size:10px; letter-spacing:.15em; color:#819b8b; }
+.bamboo-card { border:1px solid #c0b28f; background:linear-gradient(160deg,#e7dcc1,#c8ba98); color:#635641; border-radius:3px; font-size:12px; padding:15px 6px; line-height:1.8; }
+.rub-zone { border-radius:3px; background:repeating-linear-gradient(90deg,#d6cbae 0 12px,#cbbd9c 12px 24px); }
+.progress-bar { border-radius:10px; height:6px; background:#e8ede4; }
+.progress-bar i { background:#7fa28e; }
+.pattern-lib { gap:8px; }
+.pattern-item { border:1px solid #d5e0d4; background:#ffffffbb; border-radius:2px; padding:12px; color:#648073; font-family:var(--serif); letter-spacing:.1em; }
+.pattern-item.active { background:#e3eee5; border-color:#7fa38e; color:#315e4c; }
+.color-row { padding:4px 0; gap:12px; }
+.color-dot { width:28px; height:28px; }
+.draw-pad { border-radius:3px; border:1px solid #d6e1d3; box-shadow:0 4px 17px #526d5e10; }
+.field label { font-size:11px; letter-spacing:.1em; color:#637d70; }
+.field select,.field input[type=text],.field input[type=file] { border:1px solid #cfdccd; background:#fffdf7; border-radius:3px; color:#476257; font-size:12px; }
+.field input[type=range] { accent-color:#6a9a80; }
+.field details,details.field { border:1px solid #d9e4d9; background:#f9fbf5; padding:15px; border-radius:3px; }
+details.field summary { color:#568572; }
+
+/* --------- Play · 水波月影的手势舞台 --------- */
+#view-play { height:100svh; padding-top:76px; position:relative; overflow:hidden; background:#e7ece6; }
+.play-stage { height:calc(100svh - 76px); isolation:isolate; }
+.play-background { position:absolute; inset:0; background:
+  linear-gradient(90deg,rgba(240,245,237,.96) 0%,rgba(240,245,237,.57) 28%,rgba(240,245,237,.1) 58%,rgba(232,238,231,.55) 100%),
+  linear-gradient(0deg,rgba(224,231,221,.96) 0%,transparent 44%,rgba(249,249,243,.64) 100%),
+  url('../assets/ink-lake-pavilion.jpg') center center / cover;
+  filter:saturate(.65); z-index:-2;
+}
+.play-background::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 58% 41%,#ffffffaa,transparent 34%); pointer-events:none; }
+#playCanvas { position:absolute; z-index:1; inset:0; }
+.play-hero-text { position:absolute; left:clamp(28px,5vw,85px); top:8%; z-index:3; pointer-events:none; }
+.play-hero-text .know-kicker { margin-bottom:22px; font-size:11px; }
+.play-hero-text h2 { font:500 clamp(30px,3.4vw,50px)/1.55 var(--serif); color:#3a5e51; letter-spacing:.16em; margin:0 0 20px; }
+.play-hero-text em { font-style:normal; color:#799b89; }
+.play-hero-text p { font:12px/2.4 var(--serif); letter-spacing:.1em; color:#819e90; }
+.play-gesture-guide { position:absolute; right:clamp(21px,4vw,70px); top:9%; z-index:3; padding:18px 22px 15px; border-top:1px solid #749d8f99; background:#f9faf1a8; backdrop-filter:blur(12px); min-width:182px; box-shadow:0 12px 30px #456d5e0b; }
+.guide-title { font:500 14px var(--serif); letter-spacing:.15em; color:#40685a; border-bottom:1px solid #c5d5c7; padding-bottom:13px; margin-bottom:8px; }
+.guide-title span { display:block; color:#9caf9e; font:9px Georgia,serif; letter-spacing:.23em; margin-top:6px; }
+.guide-row { display:flex; gap:15px; padding:11px 1px; border-bottom:1px solid #dce6d955; align-items:center; }
+.guide-row b { width:24px; font-size:21px; font-weight:400; text-align:center; color:#789988; }
+.guide-row span { font:12px var(--serif); letter-spacing:.1em; color:#507266; }
+.guide-row small { display:block; font:10px sans-serif; letter-spacing:.12em; color:#99afa1; margin-top:6px; }
+.play-hud { z-index:4; top:auto; bottom:145px; left:clamp(20px,4vw,70px); max-width:min(420px,80vw); }
+.play-status { background:rgba(249,250,243,.82); color:#4e7765; border:1px solid #c4d9c7; border-radius:3px; padding:11px 17px; box-shadow:0 10px 25px #355d4c0e; backdrop-filter:blur(12px); font-size:12px; line-height:1.7; }
+.scene-tip { background:#e2ece0e8; border:1px solid #a5bfaa; border-radius:3px; color:#416b5d; box-shadow:0 8px 28px #46654a16; }
+.play-controls { z-index:4; bottom:51px; left:clamp(20px,4vw,70px); right:clamp(20px,4vw,70px); justify-content:center; align-items:center; gap:9px; padding:15px; border:1px solid #bed1c2a8; background:rgba(250,251,243,.83); backdrop-filter:blur(17px); box-shadow:0 15px 38px rgba(41,71,53,.09); border-radius:3px; }
+.play-controls .btn-primary,.play-controls .btn-ghost,.play-controls .btn-gold { padding:13px 16px; font-size:12px; white-space:nowrap; }
+.fold-control { background:#f8faf4; border:1px solid #cbdccc; color:#577765; border-radius:3px; height:43px; padding:8px 11px; }
+.fold-control input { accent-color:#6c9a83; width:110px; }
+.play-hint { z-index:3; bottom:17px; color:#799689; font-size:10px; letter-spacing:.07em; padding:0 10px; line-height:1.7; }
+.play-cam { z-index:5; top:50%; right:28px; transform:translateY(-50%); border:3px solid #f8faf4; border-radius:3px; box-shadow:0 15px 40px #36554e33; }
+
+/* --------- 作品典藏 --------- */
+.modal-mask { background:#2e4b43a8; backdrop-filter:blur(13px); }
+.modal-card { background:linear-gradient(145deg,#fffdf6,#edf2e9); border:1px solid #d8e2d3; border-radius:5px; padding:30px 36px; box-shadow:0 30px 90px #25453955; }
+.modal-kicker { font:10px Georgia,serif; color:#8aa597; letter-spacing:.22em; margin-bottom:14px; }
+.modal-card h3 { font:500 25px var(--serif); color:#456c58; letter-spacing:.23em; margin-bottom:19px; }
+#cardCanvas { border-radius:3px; }
+.card-form input { border-radius:2px; background:#fdfcf7; }
+#toast { border-radius:3px; background:#3c6155; color:#faf7ec; letter-spacing:.08em; }
+
+/* --------- Mobile / Laptop --------- */
+@media (max-height:750px) and (min-width:961px) {
+  .landing-hero { padding-top:2vh; padding-bottom:1vh; }
+  .hero-art { height:60vh; min-height:350px; }
+  .hero-poetry { margin-top:16px; }
+  .landing-title { font-size:clamp(48px,5.8vw,75px); }
+  .landing-slogan { margin-bottom:17px; }
+  .hero-small-note { margin-top:25px; }
+  .make-panel { padding-top:18px; }
+  .make-panel>.know-kicker { margin-bottom:8px; }
+  .make-heading h2 { font-size:25px; }
+  .make-intro { margin-bottom:10px; }
+  .step-progress { margin-bottom:12px; padding-top:10px; }
+  .play-hud { bottom:122px; }
+  .play-controls { bottom:48px; padding:10px; }
+}
+@media (max-width:1120px) {
+  .make-layout { grid-template-columns:minmax(330px,39%) minmax(0,1fr); }
+  .play-hero-text h2 { font-size:35px; }
+  .play-controls { gap:6px; }
+  .play-controls .btn-primary,.play-controls .btn-ghost,.play-controls .btn-gold { padding:12px 10px; font-size:11px; }
+  .play-gesture-guide { top:7%; right:23px; }
+}
+@media (max-width:960px) {
+  #topnav { height:66px; padding:0 17px; }
+  .nav-links { gap:12px; }
+  #topnav .nav-links a { padding:22px 3px; }
+  .brand-copy small { display:none; }
+  .brand-copy b { font-size:15px; }
+  .brand-seal { width:35px; height:35px; font-size:17px; }
+  #view-know,#view-make,#view-play { height:auto; min-height:100svh; padding-top:66px; }
+  .know-layout,.make-layout { grid-template-columns:1fr; height:auto; }
+  .know-scroll { height:auto; max-height:none; overflow:visible; }
+  .know-section { min-height:65vh; padding:65px 8vw; }
+  .know-stage { display:block; height:54vh; min-height:350px; grid-row:1; }
+  .make-panel { order:2; overflow:visible; padding:30px 7vw; }
+  .make-stage { order:1; height:52vh; min-height:360px; }
+  .play-stage { height:max(740px,calc(100svh - 66px)); }
+  .play-hero-text { top:5%; left:5%; }
+  .play-gesture-guide { right:5%; top:5%; }
+  .play-controls { left:4%; right:4%; bottom:64px; }
+  .play-hud { left:4%; bottom:155px; }
+}
+@media (max-width:670px) {
+  .landing-nav { padding:18px 20px 0; }
+  .landing-nav-tag { display:none; }
+  .landing-logo b { font-size:16px; }
+  .landing-logo small { font-size:7px; }
+  .landing-nav .nav-btn { padding:7px 12px; font-size:11px; }
+  #view-landing { min-height:100svh; }
+  .hero-scene { background-position:center,center,62% 75%; }
+  .landing-hero { grid-template-columns:1fr; padding:18px 24px 20px; align-content:center; justify-items:center; gap:0; }
+  .hero-copy { order:2; text-align:center; padding:5px 0 0; }
+  .hero-art { order:1; width:min(78vw,355px); height:min(43vh,345px); min-height:230px; }
+  .hero-art-arch { width:89%; }
+  .landing-umbrella { max-width:none; }
+  .hero-art-seal { font-size:10px; padding:5px; right:-1%; bottom:12%; }
+  .hero-art-label--top { font-size:9px; right:-5%; top:4%; }
+  .hero-art-label--bottom { display:none; }
+  .eyebrow { justify-content:center; font-size:10px; }
+  .eyebrow-line { width:20px; }
+  .hero-poetry { margin:12px 0 3px; font-size:11px; }
+  .landing-title { font-size:clamp(41px,11vw,61px); letter-spacing:.07em; margin-bottom:4px; }
+  .landing-sub { font-size:13px; margin:4px 0 10px; }
+  .landing-slogan { font-size:11px; line-height:1.85; margin-bottom:19px; }
+  .landing-actions { justify-content:center; gap:8px; }
+  .landing-actions button { padding:13px 14px; min-width:unset; font-size:11px; }
+  .hero-small-note { justify-content:center; gap:7px; margin-top:21px; font-size:9px; }
+  .landing-bottom { display:none; }
+  .landing-footer { padding:10px 6px 17px; font-size:9px; }
+  #topnav { gap:5px; }
+  .nav-brand { gap:5px; }
+  .brand-copy b { font-size:13px; letter-spacing:.05em; }
+  .nav-links { gap:5px; }
+  #topnav .nav-links a { font-size:11px; letter-spacing:0; }
+  #topnav .nav-links a span { display:none; }
+  #topnav .nav-btn { padding:7px; font-size:10px; }
+  .know-section { padding:52px 8vw; min-height:72vh; }
+  .know-section::before { left:8vw; }
+  .know-section h2 { font-size:29px; }
+  .know-stage { height:40vh; min-height:290px; }
+  .stage-overline { left:17px; top:17px; font-size:9px; }
+  .know-progress { top:15px; right:16px; padding:6px 9px; font-size:10px; }
+  .hotspot-list { flex-wrap:wrap; }
+  .material-grid { grid-template-columns:repeat(2,1fr); }
+  .make-stage { height:42vh; min-height:300px; }
+  .make-stage .stage-caption { bottom:50px; left:17px; }
+  .make-stage .hint { bottom:10px; font-size:9px; }
+  .make-panel { padding:28px 7%; }
+  .play-stage { height:max(750px,calc(100svh - 66px)); }
+  .play-hero-text { top:4%; left:6%; }
+  .play-hero-text h2 { font-size:27px; margin-bottom:5px; }
+  .play-hero-text p { font-size:10px; }
+  .play-hero-text .know-kicker { font-size:9px; margin-bottom:5px; }
+  .play-gesture-guide { top:4%; right:5%; min-width:125px; padding:11px; }
+  .guide-title { font-size:11px; margin-bottom:0; padding-bottom:7px; }
+  .guide-title span { font-size:7px; }
+  .guide-row { gap:6px; padding:8px 0; }
+  .guide-row b { font-size:15px; width:18px; }
+  .guide-row span { font-size:10px; }
+  .guide-row small { font-size:8px; margin-top:3px; }
+  .play-controls { bottom:52px; padding:11px 9px; gap:8px; }
+  .play-controls .btn-primary,.play-controls .btn-ghost,.play-controls .btn-gold { width:calc(50% - 4px); flex:auto; }
+  .play-controls .btn-gold { width:100%; }
+  .fold-control { width:100%; justify-content:center; }
+  .fold-control input { flex:1; max-width:180px; }
+  .play-hud { max-width:92%; bottom:260px; }
+  .play-hint { bottom:8px; font-size:9px; }
+  .play-cam { width:130px; right:12px; top:47%; }
+  .modal-card { padding:20px 12px; max-width:94vw; }
+}
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; scroll-behavior:auto!important; } }

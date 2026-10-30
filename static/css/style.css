@@ -603,3 +603,9 @@ button { font-family: inherit; }
     .make-stage { min-height: 46vh; }
     #topnav { gap: 12px; font-size: 13px; }
 }
+
+/* 收伞展示滑杆：移动端也可直接体验真实的 3D 伞骨收束 */
+.fold-control { display:inline-flex; align-items:center; gap:9px; padding:7px 13px; border:1px solid rgba(134,165,154,.44); border-radius:999px; color:#e9e2d2; background:rgba(34,53,54,.6); font-size:12px; white-space:nowrap; }
+.fold-control input { width:120px; accent-color:#86a59a; cursor:pointer; }
+.fold-control output { min-width:35px; font-variant-numeric:tabular-nums; text-align:right; }
+@media(max-width:650px) { .fold-control { width:100%; justify-content:center; } .fold-control input { flex:1; max-width:190px; } }

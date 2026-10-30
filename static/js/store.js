@@ -1,6 +1,6 @@
 // 全局共享状态：伞面纹理画布、作品信息、制伞进度
 export const store = {
-  workName: '我的油纸伞',
+  workName: '我的西湖绸伞',
   patternImg: null,      // 用户上传/生成的图案
   scale: 100,
   rotate: 0,
@@ -12,6 +12,16 @@ texCanvas.width = texCanvas.height = 1024;
 export const texCtx = texCanvas.getContext('2d');
 
 const PALETTE = { paper: '#e9e2d2', ink: '#334a48', sage: '#86a59a' };
+
+// 初始伞面采用淡墨山水纹样（用户仍可在绘纹步骤替换），加载完成后通知三维纹理刷新。
+const starterPattern = new Image();
+starterPattern.onload = () => {
+  if (!store.patternImg) {
+    drawTexture();
+    window.dispatchEvent(new Event('silk-pattern-ready'));
+  }
+};
+starterPattern.src = 'assets/default-silk-pattern.jpg';
 
 // 重绘伞面纹理（底纸 + 图案 + 伞骨放射线 + 外圈）
 export function drawTexture() {
@@ -31,12 +41,17 @@ export function drawTexture() {
     const ratio = Math.max(980 / img.width, 980 / img.height) * s;
     ctx.drawImage(img, -img.width * ratio / 2, -img.height * ratio / 2, img.width * ratio, img.height * ratio);
   } else {
-    // 默认：烟雨落叶纹
-    ctx.fillStyle = PALETTE.sage;
-    for (let i = 0; i < 18; i++) {
-      ctx.beginPath();
-      ctx.ellipse(512 + Math.sin(i * 1.7) * 300, 512 + Math.cos(i * 1.7) * 300, 80, 35, i, 0, Math.PI * 2);
-      ctx.fill();
+    // 默认是从用户提供的淡墨山水参考图提炼而来的轻柔绢面纹样。
+    // 图片还未加载时采用柔和留白，避免旧版大面积绿色圆点。
+    if (starterPattern.complete && starterPattern.naturalWidth > 0) {
+      ctx.drawImage(starterPattern, 0, 0, 1024, 1024);
+    } else {
+      const mist = ctx.createRadialGradient(512, 560, 50, 512, 560, 520);
+      mist.addColorStop(0, '#e2e9e1');
+      mist.addColorStop(.7, '#edf0e7');
+      mist.addColorStop(1, '#f3f0e8');
+      ctx.fillStyle = mist;
+      ctx.fillRect(0, 0, 1024, 1024);
     }
   }
   ctx.restore();

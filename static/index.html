@@ -4,8 +4,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>一伞烟雨 · 油纸伞非遗智能交互体验</title>
+    <title>伞间西湖 · 烟雨绸伞数字雅集</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/westlake-theme.css">
     <script type="importmap">
         { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js" } }
     </script>
@@ -13,31 +14,52 @@
 
 <body>
     <!-- 顶部导航 -->
-    <nav id="topnav" class="hidden">
-        <span class="brand">一伞烟雨</span>
-        <a href="#/know" data-route="know">第一幕 · 知伞</a>
-        <a href="#/make" data-route="make">第二幕 · 制伞</a>
-        <a href="#/play" data-route="play">第三幕 · 撑伞</a>
-        <button id="soundToggle" class="nav-btn" title="声音开关">🔊 声音</button>
+    <nav id="topnav" class="hidden" aria-label="主导航">
+        <a class="nav-brand" href="#/" aria-label="返回首页"><span class="brand-seal">伞</span><span class="brand-copy"><b>伞间西湖</b><small>WEST LAKE · SILK UMBRELLA</small></span></a>
+        <div class="nav-links">
+            <a href="#/know" data-route="know"><span>01</span> 知伞</a>
+            <a href="#/make" data-route="make"><span>02</span> 制伞</a>
+            <a href="#/play" data-route="play"><span>03</span> 听雨</a>
+        </div>
+        <button id="soundToggle" class="nav-btn" title="声音开关">♫ 声音</button>
     </nav>
 
-    <!-- 落地页 -->
+    <!-- 落地页 · 烟雨西湖主题视觉 -->
     <section id="view-landing" class="view">
+        <div class="hero-scene" aria-hidden="true"></div>
         <canvas id="landingRain" class="landing-rain"></canvas>
-        <div class="landing-hero">
-            <div class="landing-umbrella"><canvas id="landingCanvas"></canvas></div>
-            <h1 class="landing-title">一 伞 烟 雨</h1>
-            <p class="landing-sub">—— 油纸伞非遗智能交互体验 ——</p>
-            <p class="landing-slogan">开伞即开卷 · 执伞入画</p>
-            <div class="landing-actions">
-                <button id="btnStart" class="btn-primary">执伞开始</button>
-                <button id="btnKnow" class="btn-ghost">先了解一下</button>
+        <header class="landing-nav">
+            <div class="landing-logo"><span class="brand-seal">伞</span><span><b>伞间西湖</b><small>WEST LAKE SILK UMBRELLA</small></span></div>
+            <span class="landing-nav-tag">非遗文化 × 数字交互体验</span>
+            <button id="soundToggleLanding" class="nav-btn" title="声音开关">♫ 声音</button>
+        </header>
+        <main class="landing-hero">
+            <div class="hero-copy">
+                <div class="eyebrow"><span class="eyebrow-line"></span> 一柄绸伞，一城江南 <span class="eyebrow-line"></span></div>
+                <div class="hero-poetry">山色空濛雨亦奇</div>
+                <h1 class="landing-title">伞间<span>·</span>西湖</h1>
+                <p class="landing-sub">于烟雨朦胧处，赴一场非遗之约</p>
+                <p class="landing-slogan">绘一方绸面，藏一卷江南。<br>让传统工艺在指尖重新苏醒。</p>
+                <div class="landing-actions">
+                    <button id="btnStart" class="btn-primary">亲手制一把伞 <span>↗</span></button>
+                    <button id="btnKnow" class="btn-ghost">循迹了解绸伞 <span>→</span></button>
+                </div>
+                <div class="hero-small-note"><span class="ink-dot"></span> 手绘纹样 <i></i> 国风影像 <i></i> 三维开合 <i></i> 手势交互</div>
             </div>
+            <div class="hero-art">
+                <div class="hero-art-arch" aria-hidden="true"></div>
+                <div class="hero-art-label hero-art-label--top">一伞容四时<br>一面藏西湖</div>
+                <div class="landing-umbrella"><canvas id="landingCanvas" aria-label="可旋转三维西湖绸伞"></canvas></div>
+                <div class="hero-art-seal" aria-hidden="true">西<br>湖<br>绸<br>伞</div>
+                <div class="hero-art-label hero-art-label--bottom">杭州 · 余杭 | SILK UMBRELLA</div>
+            </div>
+        </main>
+        <div class="landing-bottom">
+            <div class="hero-scroll"><span class="scroll-line"></span> SCROLL INTO THE STORY</div>
+            <div class="landing-journey"><span>第一卷 · 知伞</span><span class="journey-divider"></span><span>第二卷 · 制伞</span><span class="journey-divider"></span><span>第三卷 · 听雨</span></div>
+            <div class="landing-number">01 / 03</div>
         </div>
-        <footer class="landing-footer">
-            <span>《智能交互与体验设计》课程作品 · 杭州非遗 · 油纸伞</span>
-            <button id="soundToggleLanding" class="nav-btn">🔊 声音</button>
-        </footer>
+        <footer class="landing-footer">《智能交互与体验设计》课程作品 · 西湖绸伞数字化体验</footer>
     </section>
 
     <!-- 第一幕 · 知伞 -->
@@ -45,25 +67,26 @@
         <div class="know-layout">
             <div class="know-scroll" id="knowScroll">
                 <div class="know-section" data-step="0">
-                    <p class="know-kicker">第一幕 · 知伞</p>
-                    <h2>江南烟雨中，一把伞缓缓撑开</h2>
-                    <p>向下滚动，伞随卷开——伞撑开的过程，就是油纸伞千年故事展开的过程。</p>
+                    <p class="know-kicker">第一卷 · 知伞 / DISCOVER</p>
+                    <div class="section-verse">湖上烟波起，伞下故人来。</div>
+                    <h2>听一场江南雨<br>识一把西湖伞</h2>
+                    <p>滑动开启绸伞的故事。让竹骨随文字舒展，看一把伞如何承载杭州的手艺与诗意。</p>
                     <p class="scroll-hint">⌄ 滚动开伞</p>
                 </div>
                 <div class="know-section" data-step="1">
-                    <h3>溯源 · 千年一伞</h3>
+                    <p class="chapter-index">CHAPTER 01</p><h3>溯源 · 千年一伞</h3>
                     <div class="timeline">
-                        <div class="tl-item"><b>春秋</b><span>传鲁班之妻云氏造伞，"劈竹为条，蒙以兽皮"。</span></div>
-                        <div class="tl-item"><b>唐宋</b><span>纸伞刷桐油防水，油纸伞走入寻常巷陌，并东传日本。</span></div>
-                        <div class="tl-item"><b>明清</b><span>杭州余杭纸伞兴盛，作坊林立，远销四方。</span></div>
-                        <div class="tl-item"><b>1932</b><span>杭州创制"西湖绸伞"，竹骨绸面，轻巧如画。</span></div>
+                        <div class="tl-item"><b>古代</b><span>中国传统制伞技艺源远流长，绢帛与竹骨在漫长岁月中相映成趣。</span></div>
+                        <div class="tl-item"><b>宋代</b><span>杭州丝织业与制伞文化兴盛，绸伞成为江南生活中的雅物。</span></div>
+                        <div class="tl-item"><b>1932</b><span>杭州都锦生丝织厂研创西湖绸伞，以淡竹为骨、杭州丝绸为面。</span></div>
+                        <div class="tl-item"><b>工艺</b><span>伞骨沿用套合技艺，绸面常以刷花、彩绘、刺绣装饰西湖风景。</span></div>
                         <div class="tl-item"><b>2008</b><span>伞制作技艺（西湖绸伞）入选国家级非物质文化遗产。</span></div>
                         <div class="tl-item"><b>今天</b><span>非遗走进数字世界——你手中的这把伞，就是延续。</span></div>
                     </div>
                 </div>
                 <div class="know-section" data-step="2">
-                    <h3>解构 · 一把伞的构造</h3>
-                    <p>以余杭纸伞为例，一把伞需经约 <b>72 道工序</b>。点击右侧部件，了解它们的名字与讲究：</p>
+                    <p class="chapter-index">CHAPTER 02</p><h3>解构 · 一把伞的构造</h3>
+                    <p>西湖绸伞有 <b>18 道主要工序</b>，以淡竹为骨、丝绸为面。点击右侧部件，了解它们的名字与讲究：</p>
                     <div class="hotspot-list">
                         <button class="hotspot-btn" data-part="ribs">伞骨</button>
                         <button class="hotspot-btn" data-part="canopy">伞面</button>
@@ -74,12 +97,12 @@
                     </div>
                 </div>
                 <div class="know-section" data-step="3">
-                    <h3>格物 · 四味材料</h3>
+                    <p class="chapter-index">CHAPTER 03</p><h3>格物 · 一伞的质地</h3>
                     <div class="material-grid">
-                        <button class="mat-card" data-mat="zhu"><i>🎋</i><b>毛竹</b><span>伞骨</span></button>
-                        <button class="mat-card" data-mat="zhi"><i>📜</i><b>桃花纸</b><span>伞面</span></button>
-                        <button class="mat-card" data-mat="qi"><i>🍅</i><b>柿漆</b><span>裱糊</span></button>
-                        <button class="mat-card" data-mat="you"><i>🛢️</i><b>桐油</b><span>防水</span></button>
+                        <button class="mat-card" data-mat="zhu"><i>🎋</i><b>淡竹</b><span>竹骨</span></button>
+                        <button class="mat-card" data-mat="zhi"><i>🧵</i><b>丝绸</b><span>绸面</span></button>
+                        <button class="mat-card" data-mat="qi"><i>🪡</i><b>丝线</b><span>连骨</span></button>
+                        <button class="mat-card" data-mat="you"><i>🎨</i><b>彩绘</b><span>饰面</span></button>
                     </div>
                     <div class="part-info" id="matInfo"><p>点击材料样本，看看它为什么不可替代。</p></div>
                 </div>
@@ -89,8 +112,10 @@
                 </div>
             </div>
             <div class="know-stage">
+                <div class="stage-overline">西湖雅物录 <span>·</span> SILK UMBRELLA</div>
                 <canvas id="knowCanvas"></canvas>
                 <div class="know-progress"><span id="knowPct">开卷 0%</span></div>
+                <div class="stage-bottom-poem">云收雨霁 · 一伞春秋</div>
             </div>
         </div>
     </section>
@@ -99,7 +124,9 @@
     <section id="view-make" class="view hidden">
         <div class="make-layout">
             <div class="make-panel">
-                <p class="know-kicker">第二幕 · 制伞</p>
+                <p class="know-kicker">第二卷 · 制伞 / CREATE YOUR OWN</p>
+                <div class="make-heading"><h2>亲手作一柄<br><em>江南绸伞</em></h2><span class="make-seal">匠<br>心</span></div>
+                <p class="make-intro">选竹、制骨、绘纹，将喜爱的山水与故事，藏进你自己的伞面。</p>
                 <div class="step-progress" id="stepProgress"></div>
                 <div id="stepBody"></div>
                 <div class="step-nav">
@@ -109,8 +136,11 @@
                 <div class="knowledge-egg hidden" id="knowledgeEgg"></div>
             </div>
             <div class="make-stage">
+                <div class="stage-overline">在线制伞工坊 <span>·</span> LIVE STUDIO</div>
+                <div class="stage-number">02<span>/03</span></div>
                 <canvas id="makeCanvas"></canvas>
-                <p class="hint">拖动旋转 · 滚轮缩放。你做的伞会实时呈现在这里。</p>
+                <div class="stage-caption"><span class="stage-caption-dot"></span><div><strong>一笔一画，皆有江南。</strong><small>你的纹样，将实时映于伞面</small></div></div>
+                <p class="hint">按住拖动 · 旋转绸伞　/　滚轮 · 细观纹理</p>
             </div>
         </div>
     </section>
@@ -118,32 +148,36 @@
     <!-- 第三幕 · 撑伞 -->
     <section id="view-play" class="view hidden">
         <div class="play-stage">
+            <div class="play-background" aria-hidden="true"></div>
+            <div class="play-hero-text"><div class="know-kicker">第三卷 · 听雨 / EXPERIENCE</div><h2>以手为风，<br><em>与伞共舞。</em></h2><p>一掌开合，一念流转。<br>在烟雨西湖，感受绸伞的温度。</p></div>
             <canvas id="playCanvas"></canvas>
+            <div class="play-gesture-guide"><div class="guide-title">手势心法 <span>GESTURES</span></div><div class="guide-row"><b>✋</b><span>张开手掌<small>缓缓开伞</small></span></div><div class="guide-row"><b>✊</b><span>握紧拳头<small>轻轻收伞</small></span></div><div class="guide-row"><b>↔</b><span>移动手掌<small>转换视角</small></span></div></div>
             <div class="play-cam hidden" id="playCamWrap">
                 <video id="playCam" autoplay playsinline muted></video>
                 <canvas id="playSkel"></canvas>
             </div>
             <div class="play-hud">
-                <div class="play-status" id="playStatus">点击"启用手势"或"手动模式"开始</div>
+                <div class="play-status" id="playStatus" role="status">点击“启用手势”或“手动模式”开始</div>
                 <div class="scene-tip hidden" id="sceneTip"></div>
             </div>
             <div class="play-controls">
-                <button id="playGesture" class="btn-primary">启用摄像头手势</button>
-                <button id="playManual" class="btn-ghost">手动模式</button>
+                <button id="playGesture" class="btn-primary">◉ 开启手势识别</button>
+                <button id="playManual" class="btn-ghost">⌘ 手动操控</button>
                 <span class="hidden" id="manualBtns">
                     <button id="playOpen" class="btn-mini">✋ 开伞</button>
                     <button id="playClose" class="btn-mini">✊ 收伞</button>
                 </span>
-                <button id="playFinish" class="btn-gold">雨歇留影 · 生成纪念卡</button>
+                <label class="fold-control">伞骨开合 <input type="range" id="playFoldSlider" min="0" max="100" step="1" value="0" aria-label="伞骨开合程度"><output id="foldValue">0%</output></label>
+                <button id="playFinish" class="btn-gold">雨歇留影 · 典藏此伞 ↗</button>
             </div>
-            <p class="play-hint">✋ 张掌=撑开　✊ 握拳=收拢　移动手掌=移伞　转腕=转伞面　｜　把镜头拉近（滚轮）可看伞面十景</p>
+            <p class="play-hint">✋ 张掌=撑开　✊ 握拳=收拢　移动手掌=旋转视角　转腕=微调角度　｜　把镜头拉近（滚轮）可看伞面十景</p>
         </div>
     </section>
 
     <!-- 纪念卡弹窗 -->
     <div class="modal-mask hidden" id="cardModal">
         <div class="modal-card">
-            <h3>伞卡留影</h3>
+            <div class="modal-kicker">RAINY WEST LAKE · MEMORY</div><h3>留一纸烟雨</h3>
             <canvas id="cardCanvas" width="900" height="1200"></canvas>
             <div class="card-form">
                 <input id="workName" maxlength="10" placeholder="给作品起个名，如：烟雨一伞">

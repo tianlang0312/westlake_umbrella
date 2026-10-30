@@ -1,18 +1,18 @@
-// 第二幕 · 制伞：六步工序交互（选竹→削骨→组装→糊面→绘纹→刷油）
+// 第二幕 · 制伞：六步工序交互（选竹→削骨→组装→绷绸→绘纹→收饰）
 import { UmbrellaScene } from '../umbrella.js';
 import { store, texCtx, drawTexture } from '../store.js';
 import { playClick, playOpen } from '../audio.js';
 
 let umb = null, cur = 0, bound = false;
-const STEP_NAMES = ['选竹', '削骨', '组装', '糊面', '绘纹', '刷油'];
+const STEP_NAMES = ['选竹', '削骨', '组装', '绷绸', '绘纹', '收饰'];
 const STEP_KEYS = ['zhu', 'gu', 'zhuang', 'hu', 'hui', 'you'];
 const EGGS = {
-  zhu: '🎋 竹龄与韧性：五年生冬竹坚韧适中；太嫩易弯，太老易脆。蒸煮后还能防蛀。',
-  gu: '🦴 伞骨数量与张力：骨条越多伞面越圆挺。余杭纸伞常见 32～44 根骨，根根要等距等弧。',
-  zhuang: '🔧 伞骨套合技艺：西湖绸伞特色——骨与槽严丝合缝，开合顺滑无声，全凭手感。',
-  hu: '📜 柿漆防水原理：青柿汁发酵成漆，粘合伞面与伞骨，自身亦防水，是"隐形缝线"。',
-  hui: '🎨 纹样寓意：荷花寓"和合"，山水寓"栖居"，一笔一画都是祝福。',
-  you: '🛢️ 桐油防水：刷油后氧化成膜，"纸伞不惧雨"。刷三遍、晒三日，方成一把好伞。',
+  zhu: '🎋 西湖绸伞以淡竹为骨，选竹讲究韧性与匀称。',
+  gu: '🦴 真正的西湖绸伞需精细加工多根竹骨。本互动采用 16 根骨架来直观演示开合结构。',
+  zhuang: '🔧 西湖绸伞的一大特色是套合技艺，合伞时竹骨可有序收拢。',
+  hu: '🧵 绸面先裁剪、绷紧，再与竹骨结合。绸料轻盈，适合传统装饰技法。',
+  hui: '🎨 绸伞常用刷花、彩绘、刺绣装饰；山水花鸟，也能化作你自己的图案。',
+  you: '🌸 绸面装饰完成后，再修饰伞边与细节。此处使用光泽变化来模拟丝绸的视觉质感。',
 };
 
 export function enterMake() {
@@ -26,7 +26,7 @@ export function enterMake() {
   umb.setRibCount(store.stepsDone.gu ? 16 : store.stepsDone.zhu ? 4 : 0);
   umb.setCanopyVisible(store.stepsDone.hu);
   umb.setOiled(store.stepsDone.you);
-  umb.openness = umb.targetOpen = store.stepsDone.zhuang ? .6 : .2;
+  umb.setOpenness(store.stepsDone.zhuang ? .6 : .2, true);
   if (!bound) {
     bound = true;
     document.getElementById('stepPrev').onclick = () => go(cur - 1);
@@ -90,23 +90,23 @@ function renderStep() {
 function renderZhu(body) {
   body.innerHTML = `
     <h3>第一步 · 选竹</h3>
-    <p class="step-desc">点击挑选一段竹龄合适的毛竹。竹龄不对，伞骨不牢。</p>
+    <p class="step-desc">点击挑选一段适宜制作竹骨的淡竹。竹材均匀，收放才能顺畅。</p>
     <div class="bamboo-row">
       <button class="bamboo-card" data-ok="0">🎋<br>一年嫩竹<br><small>太软</small></button>
-      <button class="bamboo-card" data-ok="1">🎋<br>五年冬竹<br><small>坚韧适中</small></button>
-      <button class="bamboo-card" data-ok="0">🎋<br>十年老竹<br><small>太脆</small></button>
+      <button class="bamboo-card" data-ok="1">🎋<br>适龄淡竹<br><small>坚韧适中</small></button>
+      <button class="bamboo-card" data-ok="0">🎋<br>老化竹材<br><small>太脆</small></button>
     </div>
-    <p class="step-desc" id="zhuMsg">匠人经验：冬竹糖分低、不易蛀。</p>`;
+    <p class="step-desc" id="zhuMsg">匠人经验：淡竹质地与弧度，会影响竹骨的强度与收合效果。</p>`;
   body.querySelectorAll('.bamboo-card').forEach(c => {
     c.onclick = () => {
       if (c.dataset.ok === '1') {
         c.classList.add('good');
-        document.getElementById('zhuMsg').textContent = '好竹！竹段劈开，可以制骨了。';
+        document.getElementById('zhuMsg').textContent = '选竹完成！可以开始制作骨架了。';
         umb.setRibCount(4); // 先出几根骨示意
         done('zhu');
       } else {
         c.classList.add('bad');
-        document.getElementById('zhuMsg').textContent = '这段竹子不合格，碎裂废弃了……再挑挑。';
+        document.getElementById('zhuMsg').textContent = '这段竹材不太适合制骨，请重新选择。';
       }
     };
   });
@@ -132,7 +132,7 @@ function renderGu(body) {
     body.querySelector('#guMsg').textContent = '打磨进度 ' + Math.round(prog) + '%';
     umb.setRibCount(Math.max(4, Math.round(prog / 100 * 16)));
     if (prog >= 100) {
-      body.querySelector('#guMsg').textContent = '十六根伞骨，根根弧度如一！';
+      body.querySelector('#guMsg').textContent = '演示骨架就位，下一步开始组装！';
       done('gu');
     }
   });
@@ -166,9 +166,9 @@ function renderZhuang(body) {
 /* ---- 4 糊面 ---- */
 function renderHu(body) {
   body.innerHTML = `
-    <h3>第四步 · 糊面</h3>
-    <p class="step-desc"><strong>长按</strong>下方按钮，把桃花纸用柿漆裱糊上骨。纸面贴合，接缝消失。</p>
-    <button class="btn-primary hold-btn" id="holdHu"><span class="fill"></span><span style="position:relative">长按裱糊</span></button>
+    <h3>第四步 · 绷绸</h3>
+    <p class="step-desc"><strong>长按</strong>下方按钮，模拟把绸面绷紧并与伞骨结合。丝绸服帖，张弛有度。</p>
+    <button class="btn-primary hold-btn" id="holdHu"><span class="fill"></span><span style="position:relative">长按绷绸</span></button>
     <div class="progress-bar"><i id="huBar"></i></div>`;
   bindHold(body.querySelector('#holdHu'), p => {
     body.querySelector('#huBar').style.width = p * 100 + '%';
@@ -201,8 +201,9 @@ function renderHui(body) {
     <details class="field"><summary style="cursor:pointer;font-size:13px">📷 也可以上传照片，AI 国风化处理</summary>
       <div class="field"><input type="file" id="huiUpload" accept="image/png,image/jpeg,image/webp,image/bmp"></div>
       <div class="field"><label>艺术效果</label><select id="huiStyle">
-        <option value="ink">水墨晕染</option><option value="gongbi">工笔描线</option><option value="pastel">江南淡彩</option>
+        <option value="ink">空灵水墨（推荐）</option><option value="gongbi">工笔淡染</option><option value="pastel">江南淡彩</option>
       </select></div>
+      <p class="step-desc">推荐使用“空灵水墨”或“江南淡彩”，整体会更接近浅墨山水、留白充足的国风效果。</p>
       <button class="btn-primary" id="huiConvert">生成并映射到伞面</button>
       <p class="step-desc" id="huiMsg"></p>
     </details>
@@ -412,9 +413,9 @@ function drawYanyu(color) {
 /* ---- 6 刷油 ---- */
 function renderYou(body) {
   body.innerHTML = `
-    <h3>第六步 · 刷油</h3>
-    <p class="step-desc"><strong>长按</strong>刷桐油，看伞面光泽渐现——纸伞从此不惧雨。</p>
-    <button class="btn-primary hold-btn" id="holdYou"><span class="fill"></span><span style="position:relative">长按刷油</span></button>
+    <h3>第六步 · 收饰</h3>
+    <p class="step-desc"><strong>长按</strong>完成伞边与光泽的最后修饰，让绸面呈现柔和丝光。</p>
+    <button class="btn-primary hold-btn" id="holdYou"><span class="fill"></span><span style="position:relative">长按收饰</span></button>
     <div class="progress-bar"><i id="youBar"></i></div>`;
   bindHold(body.querySelector('#holdYou'), p => {
     body.querySelector('#youBar').style.width = p * 100 + '%';
